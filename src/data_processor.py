@@ -92,9 +92,9 @@ class CodePreprocessor:
             'test': encode_split(test_idx)
         }
         labels = {
-            'train': torch.tensor(df.iloc[train_idx]['target'].values, dtype=torch.long),
-            'val': torch.tensor(df.iloc[val_idx]['target'].values, dtype=torch.long),
-            'test': torch.tensor(df.iloc[test_idx]['target'].values, dtype=torch.long)
+            'train': torch.tensor(df.iloc[train_idx]['target'].values, dtype=torch.float32),
+            'val': torch.tensor(df.iloc[val_idx]['target'].values, dtype=torch.float32),
+            'test': torch.tensor(df.iloc[test_idx]['target'].values, dtype=torch.float32)
         }
 
         return {'inputs': inputs, 'labels': labels}

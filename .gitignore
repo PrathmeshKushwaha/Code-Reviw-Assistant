@@ -1,1 +1,12 @@
 data/
+.venv
+__pycache__/
+*.py[cod]
+*$py.class
+src/__pycache__/
+src/*.py[cod]
+src/*$py.class
+scripts/__pycache__/
+scripts/*.py[cod]
+scripts/*$py.class
+scripts/__pycache__/phase2_preprocess.cpython-311.pyc
