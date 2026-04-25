@@ -40,37 +40,19 @@ class TextCNN(nn.Module):
                    f"filters={num_filters}×{filter_sizes}, dropout={dropout}")
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """
-        Args:
-            x: [batch_size, seq_len] token IDs
-        Returns:
-            logits: [batch_size] raw scores (apply sigmoid for probability)
-        """
-        # Embed: [B, L] → [B, L, E]
-        x = self.embedding(x)  # [B, L, E]
+        x = self.embedding(x).permute(0, 2, 1)  # [B, E, L]
         
-        # Rearrange for Conv1d: [B, E, L]
-        x = x.permute(0, 2, 1)
-        
-        # Apply each conv + ReLU + max-over-time pooling
         conv_outputs = []
         for conv in self.convs:
-            # Conv: [B, E, L] → [B, F, L']
             conv_out = F.relu(conv(x))
-            # Max-over-time: [B, F, L'] → [B, F]
+            # ✅ REVERTED to original working max pooling
             pooled = F.max_pool1d(conv_out, kernel_size=conv_out.size(2)).squeeze(2)
             conv_outputs.append(pooled)
-        
-        # Concatenate all filter outputs: [B, F*3]
+            
         x = torch.cat(conv_outputs, dim=1)
-        
-        # Regularization
         x = self.bn(x)
         x = self.dropout(x)
-        
-        # Final classification layer
-        logits = self.fc(x).squeeze(1)  # [B, 1] → [B]
-        return logits
+        return self.fc(x).squeeze(1)
 
     def predict_proba(self, x: torch.Tensor) -> torch.Tensor:
         """Convenience: returns probability (sigmoid applied)"""

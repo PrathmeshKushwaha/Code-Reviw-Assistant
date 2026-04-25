@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+from xml.parsers.expat import model
 import yaml
 import logging
 import numpy as np
@@ -65,7 +66,8 @@ def train():
     ).to(device)
 
     # 4. Optimizer & Loss
-    optimizer = torch.optim.Adam(model.parameters(), lr=float(model_cfg["lr"]))
+    optimizer = torch.optim.Adam(model.parameters(), lr=float(model_cfg["lr"]), weight_decay=1e-4)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=model_cfg["epochs"])
     criterion = nn.BCEWithLogitsLoss()
 
     # 5. Training Loop
@@ -87,6 +89,7 @@ def train():
             logits = model(inputs)
             loss = criterion(logits, labels)
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)  # ADD THIS LINE
             optimizer.step()
             train_loss += loss.item() * inputs.size(0)
 
@@ -117,6 +120,7 @@ def train():
         logging.info(f"Epoch {epoch:2d}/{epochs} | "
                     f"Train Loss: {avg_train_loss:.4f} | Val Loss: {avg_val_loss:.4f} | "
                     f"Acc: {val_metrics['accuracy']:.3f} | F1: {val_metrics['f1']:.3f} | AUC: {val_metrics['auc_roc']:.3f}")
+        scheduler.step()
 
         # Early Stopping
         if avg_val_loss < best_val_loss:
