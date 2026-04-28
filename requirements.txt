@@ -1,0 +1,23 @@
+# Core ML
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
+
+# HuggingFace ecosystem
+transformers>=4.30.0
+datasets>=2.14.0
+huggingface_hub>=0.16.0
+evaluate>=0.4.0        # For BLEU-4 scoring later
+
+# Data & Utils
+pandas>=2.1.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
+pyyaml>=6.0
+tqdm>=4.66.0
+matplotlib>=3.7.0
+seaborn>=0.12.0        # For activation heatmaps
+gensim>=4.3.0          # Optional: Word2Vec utils
+
+# Code tokenization
+tokenizers>=0.13.0

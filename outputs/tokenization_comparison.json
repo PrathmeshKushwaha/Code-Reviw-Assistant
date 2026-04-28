@@ -1,0 +1,22 @@
+{
+  "C (Devign)": {
+    "fertility": 1.5441,
+    "word_oov_rate": 0.0011,
+    "bpe_oov_rate": 0.0,
+    "word_vocab_coverage": 0.0612,
+    "bpe_vocab_coverage": 0.0279,
+    "avg_word_seq_len": 1114.5,
+    "avg_bpe_seq_len": 1817.32,
+    "n_samples": 50
+  },
+  "Python (CodeSearchNet)": {
+    "fertility": 2.3243,
+    "word_oov_rate": 0.1292,
+    "bpe_oov_rate": 0.0,
+    "word_vocab_coverage": 0.1356,
+    "bpe_vocab_coverage": 0.0783,
+    "avg_word_seq_len": 232.22,
+    "avg_bpe_seq_len": 534.5,
+    "n_samples": 50
+  }
+}
