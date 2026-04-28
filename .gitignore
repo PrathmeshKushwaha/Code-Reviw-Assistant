@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 data/
 .venv
 __pycache__/
@@ -10,3 +11,6 @@ scripts/__pycache__/
 scripts/*.py[cod]
 scripts/*$py.class
 scripts/__pycache__/phase2_preprocess.cpython-311.pyc
+=======
+data/
+>>>>>>> b5e7042d458f9232a63fd611b30443fb91c9fd0b
