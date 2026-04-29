@@ -1,0 +1,1 @@
+sample_id,true_label,cnn_pred,cnn_confidence,cnn_error_type,manual_avg_zero_shot,manual_avg_one_shot,manual_avg_few_shot,dominant_prompt
