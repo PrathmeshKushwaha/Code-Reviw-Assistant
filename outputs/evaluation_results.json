@@ -1,7 +1,7 @@
 {
-  "model": "llama-3.1-8b-instant",
-  "n_samples": 1,
-  "cnn_accuracy": 1.0,
+  "model": "Salesforce/codet5p-220m",
+  "n_samples": 50,
+  "cnn_accuracy": 0.58,
   "bleu4_corpus": {
     "zero_shot": 0.0,
     "one_shot": 0.0,
@@ -9,25 +9,28 @@
   },
   "manual_scores_avg": {
     "zero_shot": {
-      "relevance": 5.0,
+      "relevance": 3.88,
       "clarity": 5.0,
-      "correctness": 3.0,
-      "overall": 4.33
+      "correctness": 3.5,
+      "overall": 4.13
     },
     "one_shot": {
-      "relevance": 5.0,
+      "relevance": 3.68,
       "clarity": 5.0,
-      "correctness": 4.0,
-      "overall": 4.67
+      "correctness": 3.66,
+      "overall": 4.11
     },
     "few_shot": {
-      "relevance": 5.0,
+      "relevance": 3.92,
       "clarity": 5.0,
-      "correctness": 3.0,
-      "overall": 4.33
+      "correctness": 3.6,
+      "overall": 4.17
     }
   },
   "error_distribution": {
-    "TP": 1
+    "TN": 19,
+    "FN": 12,
+    "TP": 10,
+    "FP": 9
   }
 }

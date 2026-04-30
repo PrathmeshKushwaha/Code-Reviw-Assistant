@@ -1,10 +1,15 @@
+import sys
 import logging
 import json
 import yaml
 import torch
 import pandas as pd
 from pathlib import Path
-from src.data_processor import CodePreprocessor
+
+# ✅ ADD THIS LINE: Adds project root to Python path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from src.data_processor import CodePreprocessor  # Now this works
 
 logging.basicConfig(
     level=logging.INFO,
