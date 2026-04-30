@@ -17,20 +17,20 @@ Automated code review faces a core trade-off: rule-based linters are fast but ri
 ---
 
 ## 🏗️ Architecture & Pipeline
-[Raw Code] 
-   │
+[Raw Code] <br>
+   │<br>
    ├─► Phase 1-2: Ingest → Clean → Tokenize → Tensorize<br>
-   │
+   │<br>
    ├─► Phase 3: TextCNN Classifier (Conv1D 3,4,5 → Max-Pool → BN → Dropout → FC)<br>
    │      └─ Output: Buggy/Clean probability + confidence<br>
-   │
+   │<br>
    ├─► Phase 4: Hook-based Activation Visualization (interpretable token-level triggers)<br>
-   │
+   │<br>
    ├─► Phase 5: Tokenization Benchmarking (BPE vs Word-Level | Python vs C)<br>
-   │
+   │<br>
    ├─► Phase 6: LLM Prompt Routing (Zero/One/Few-Shot → CodeT5 via HF Inference API)<br>
    │      ─ Caching + exponential backoff for rate-limit resilience<br>
-   │
+   │<br>
    ─► Phase 7: Evaluation & Integration (BLEU-4, heuristic scoring, side-by-side table, error analysis)<br>
 
 
