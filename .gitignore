@@ -10,8 +10,11 @@ scripts/__pycache__/
 scripts/*.py[cod]
 scripts/*$py.class
 scripts/__pycache__/phase2_preprocess.cpython-311.pyc
+<<<<<<< HEAD
 .env
 .env.*
 logs/
 output/
 .env
+=======
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9

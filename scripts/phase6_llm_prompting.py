@@ -21,6 +21,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 from typing import Optional
+<<<<<<< HEAD
 
 REQUEST_DELAY = 2.0
 
@@ -33,10 +34,18 @@ except ImportError:
  
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+=======
+import time 
+REQUEST_DELAY = 2.0 
+ 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+ 
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)-8s | %(message)s"
 )
+<<<<<<< HEAD
 
 # DEBUG: Print what the script sees (MUST be after basicConfig)
 logging.info(f"🔍 DEBUG: API_PROVIDER={os.environ.get('API_PROVIDER')}, OLLAMA_MODEL={os.environ.get('OLLAMA_MODEL')}")
@@ -67,6 +76,9 @@ def _groq_available() -> bool:
 def _hf_available() -> bool:
     """Check if HF API key is set"""
     return bool(os.environ.get("HF_API_KEY", "").strip())
+=======
+ 
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
 OUTPUT_DIR = Path("outputs")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 CACHE_FILE = OUTPUT_DIR / "llm_cache.json"
@@ -160,8 +172,13 @@ TEMPLATES = {
 # ---------------------------------------------------------------------------
 # Cache helpers
 # ---------------------------------------------------------------------------
+<<<<<<< HEAD
 def _cache_key(prompt: str, model: str, provider: str) -> str:
     return hashlib.md5(f"{provider}::{model}::{prompt}".encode()).hexdigest()
+=======
+def _cache_key(prompt: str, model: str) -> str:
+    return hashlib.md5(f"{model}::{prompt}".encode()).hexdigest()
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
  
  
 def load_cache() -> dict:
@@ -180,6 +197,7 @@ def save_cache(cache: dict):
 # ---------------------------------------------------------------------------
 # Inference helpers
 # ---------------------------------------------------------------------------
+<<<<<<< HEAD
 def call_llm_api(
     prompt: str,
     provider: str,
@@ -283,6 +301,95 @@ def _call_hf(prompt: str, model: str, max_new_tokens: int, retries: int, backoff
             elif "authentication" in err or "401" in err: return None
             else: time.sleep(backoff)
     return None
+=======
+def call_groq_api(
+    prompt: str,
+    model: str,
+    max_new_tokens: int = 512,
+    retries: int = 3,
+    backoff: float = 2.0,
+) -> Optional[str]:
+    """
+    Generate a comment via:
+      1. Groq API (if GROQ_API_KEY is set and USE_LOCAL != '1')
+      2. Local transformers pipeline (fallback)
+
+    Groq is fast, free-tier friendly, and supports popular open models.
+    Get your key at: https://console.groq.com/keys
+    """
+    use_local = os.environ.get("USE_LOCAL", "0") == "1"
+    groq_key  = os.environ.get("GROQ_API_KEY", "").strip()
+
+    if not groq_key:
+        logging.warning(
+            "   GROQ_API_KEY is not set — inference will run locally. "
+            "Set it with: export GROQ_API_KEY=gsk_your_key_here"
+        )
+
+    # ------------------------------------------------------------------ #
+    # PATH A: local transformers pipeline                                  #
+    # ------------------------------------------------------------------ #
+    if use_local or not groq_key:
+        return _call_local(prompt, model, max_new_tokens)
+
+    # ------------------------------------------------------------------ #
+    # PATH B: Groq API                                                     #
+    # ------------------------------------------------------------------ #
+    try:
+        from groq import Groq
+    except ImportError:
+        logging.error(
+            "groq package not installed — cannot use Groq API. "
+            "Run: pip install groq   then restart."
+        )
+        return _call_local(prompt, model, max_new_tokens)
+
+    logging.info(f"   Calling Groq API: model={model}")
+    client = Groq(api_key=groq_key)
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are an expert code reviewer specialising in C/C++ security "
+                "vulnerabilities and bugs. Be concise and technical."
+            ),
+        },
+        {"role": "user", "content": prompt},
+    ]
+
+    for attempt in range(1, retries + 1):
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                max_tokens=max_new_tokens,
+                temperature=0.3,
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            err     = str(e)
+            err_low = err.lower()
+            logging.error(f"\n🔥 GROQ ERROR:\n{repr(e)}\n")
+
+            if "rate_limit" in err_low or "429" in err:
+                wait = backoff ** attempt
+                logging.warning(f"   Rate limited. Waiting {wait:.0f}s...")
+                time.sleep(wait)
+            elif "model_not_found" in err_low or "model not found" in err_low:
+                logging.warning(
+                    f"   Model '{model}' not found on Groq. "
+                    "Check available models at: https://console.groq.com/docs/models"
+                )
+                break
+            elif "authentication" in err_low or "401" in err:
+                logging.warning("   Invalid GROQ_API_KEY. Check: https://console.groq.com/keys")
+                break
+            else:
+                time.sleep(backoff)
+
+    raise RuntimeError("Groq API failed — no fallback allowed")
+
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
 
 # Module-level cache for the local pipeline (loaded once, reused across calls)
 _local_pipeline = None
@@ -345,6 +452,7 @@ def _call_local(prompt: str, model: str, max_new_tokens: int = 128) -> Optional[
         logging.error(f"   Local inference failed: {repr(e)}")
         return None
 
+<<<<<<< HEAD
 def _call_ollama(
     prompt: str,
     model: str,
@@ -394,6 +502,11 @@ def generate_comment(
     code: str,
     prompt_type: str,
     provider: str,
+=======
+def generate_comment(
+    code: str,
+    prompt_type: str,
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
     model: str,
     cache: dict,
     max_new_tokens: int = 128,
@@ -401,10 +514,18 @@ def generate_comment(
     """Build prompt, check cache, call API."""
     template = TEMPLATES[prompt_type]
     prompt = template.format(code=code)
+<<<<<<< HEAD
     key = _cache_key(prompt, model, provider)
     if key in cache:
         return cache[key]
     comment = call_llm_api(prompt=prompt, provider=provider, model=model, max_new_tokens=max_new_tokens)
+=======
+    key = _cache_key(prompt, model)
+    if key in cache:
+        return cache[key]
+ 
+    comment = call_groq_api(prompt, model, max_new_tokens=max_new_tokens)
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
     if comment is None:
         comment = "[API call failed – see logs]"
  
@@ -471,10 +592,32 @@ def load_test_samples(n: int = 50) -> list[dict]:
     ]
     # Repeat to reach n
     samples = (fallback * ((n // len(fallback)) + 1))[:n]
+<<<<<<< HEAD
     for i, s in enumerate(samples):
         s["sample_id"] = i  # re-index so IDs are unique
     logging.info(f"✅ Using {len(samples)} fallback samples.")
     return samples
+=======
+    for i, sample in enumerate(samples):
+        for prompt_type in ["zero_shot", "one_shot", "few_shot"]:
+
+            logger.info(f"[{i}] sample={sample['id']} | prompt={prompt_type}")
+
+            start_time = time.time()
+
+            comment = generate_comment(
+                code=sample["code"],
+                prompt_type=prompt_type,
+                model=model_name,
+                max_new_tokens=128,
+            )
+
+            elapsed = time.time() - start_time
+            logger.info(f"⏱ Response time: {elapsed:.2f}s")
+
+            # 🔥 RATE LIMIT CONTROL
+            time.sleep(REQUEST_DELAY)
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
  
  
 # ---------------------------------------------------------------------------
@@ -485,6 +628,7 @@ def run():
     logging.info("Phase 6: LLM Prompt Engineering")
     logging.info("=" * 60)
  
+<<<<<<< HEAD
     # Configuration from environment
     api_provider = os.environ.get("API_PROVIDER", "auto").lower()
     ollama_model = os.environ.get("OLLAMA_MODEL", "qwen2.5-coder:7b-instruct-q4_K_M")  # ← Default fallback
@@ -511,6 +655,12 @@ def run():
             provider, model_name = "local", os.environ.get("LOCAL_MODEL", "Qwen/Qwen2.5-0.5B-Instruct")
     logging.info(f"   Provider:  {provider}")
     logging.info(f"   Model:     {model_name}")
+=======
+    # Groq model — see https://console.groq.com/docs/models for full list
+    model_name = os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant")
+    n_samples  = int(os.environ.get("N_SAMPLES", "50"))
+    logging.info(f"   Model:   {model_name}")
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
     # Warn if user picked a base (non-instruct) model unlikely to follow prompts
     # Recommended Groq models for code review:
     # llama-3.1-8b-instant  — fast, free, good quality
@@ -544,7 +694,10 @@ def run():
             comment = generate_comment(
                 code=sample["code"],
                 prompt_type=prompt_type,
+<<<<<<< HEAD
                 provider=provider,
+=======
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
                 model=model_name,
                 cache=cache,
                 max_new_tokens=128,
@@ -559,8 +712,13 @@ def run():
     # Save outputs
     # ------------------------------------------------------------------
     json_path = OUTPUT_DIR / "llm_comments.json"
+<<<<<<< HEAD
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump({"provider": provider, "model": model_name, "results": results}, f, indent=2, ensure_ascii=False)
+=======
+    with open(json_path, "w") as f:
+        json.dump({"model": model_name, "results": results}, f, indent=2, ensure_ascii=False)
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
     logging.info(f"\n💾 Saved JSON: {json_path}")
  
     csv_path = OUTPUT_DIR / "llm_comments.csv"

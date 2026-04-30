@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 """
+<<<<<<< HEAD
 Code Review Assistant — Interactive CLI Demo
+=======
+Code Review Assistant — CLI Demo
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
 Uses YOUR trained TextCNN (Phase 3) to classify code, then uses an LLM
 (Phase 6 few-shot) to explain WHY.
 
 Usage:
+<<<<<<< HEAD
   python interactive_cli.py                          # interactive menu
   python interactive_cli.py --file mycode.c          # review a file directly
   python interactive_cli.py --sample 1               # run a built-in sample
@@ -25,6 +30,15 @@ Environment variables:
   LOCAL_MODEL                   (default: Qwen/Qwen2.5-0.5B-Instruct)
   ANTHROPIC_API_KEY
   API_PROVIDER                  (groq|hf|ollama|local|anthropic|auto)
+=======
+  python code_review_cli.py                     # interactive menu
+  python code_review_cli.py --file mycode.c     # review a file directly
+  python code_review_cli.py --sample 1          # run a built-in sample
+
+Requirements:
+  pip install rich groq torch
+  Set GROQ_API_KEY or ANTHROPIC_API_KEY in environment.
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
 
 Project artefacts expected at (from Phase 2 & 3):
   data/processed/vocab.json
@@ -37,6 +51,7 @@ import sys
 import json
 import math
 import time
+<<<<<<< HEAD
 import hashlib
 import argparse
 import textwrap
@@ -107,6 +122,24 @@ def _save_cache(cache: dict):
         pass  # non-fatal
 
 
+=======
+import argparse
+import textwrap
+from pathlib import Path
+
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
+from rich.syntax import Syntax
+from rich.prompt import Prompt, Confirm
+from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.text import Text
+from rich.rule import Rule
+from rich import box
+
+console = Console()
+
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
 # ─────────────────────────────────────────────────────────────────────────────
 # Few-shot prompt  (mirrors phase6_llm_prompting.py FEW_SHOT_TEMPLATE)
 # ─────────────────────────────────────────────────────────────────────────────
@@ -200,6 +233,7 @@ SAMPLES = {
 _cnn_model = None
 _cnn_vocab = None
 
+<<<<<<< HEAD
 
 def _find_artefacts() -> tuple[Path, Path]:
     """
@@ -224,10 +258,16 @@ def _find_artefacts() -> tuple[Path, Path]:
 
     # Fallback: hardcoded relative paths
     for base in [Path("data/processed"), Path("../data/processed")]:
+=======
+def _find_artefacts():
+    candidates = [Path("data/processed"), Path("../data/processed")]
+    for base in candidates:
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
         vocab = base / "vocab.json"
         model = base / "best_textcnn.pt"
         if vocab.exists() and model.exists():
             return vocab, model
+<<<<<<< HEAD
 
     raise FileNotFoundError(
         "Could not find data/processed/vocab.json and data/processed/best_textcnn.pt\n"
@@ -235,10 +275,18 @@ def _find_artefacts() -> tuple[Path, Path]:
     )
 
 
+=======
+    raise FileNotFoundError(
+        "Could not find data/processed/vocab.json and data/processed/best_textcnn.pt\n"
+        "Run from your project root after completing Phase 2 & 3."
+    )
+
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
 def load_cnn():
     global _cnn_model, _cnn_vocab
     if _cnn_model is not None:
         return
+<<<<<<< HEAD
 
     import torch
 
@@ -248,6 +296,10 @@ def load_cnn():
     if str(project_root) not in sys.path:
         sys.path.insert(0, str(project_root))
 
+=======
+    import torch
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
     from src.textcnn_model import TextCNN, get_device
 
     vocab_path, model_path = _find_artefacts()
@@ -262,10 +314,15 @@ def load_cnn():
     _cnn_model.to(device).eval()
     _cnn_model._device = device
 
+<<<<<<< HEAD
 
 def _preprocess(code: str, max_len: int = 512):
     import torch
 
+=======
+def _preprocess(code: str, max_len: int = 512):
+    import torch
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
     code = re.sub(r'/\*.*?\*/', '', code, flags=re.DOTALL)
     code = re.sub(r'//.*$', '', code, flags=re.MULTILINE)
     code = ' '.join(code.split()).strip()
@@ -276,10 +333,15 @@ def _preprocess(code: str, max_len: int = 512):
     ids += [0] * (max_len - len(ids))
     return torch.tensor(ids, dtype=torch.long).unsqueeze(0)
 
+<<<<<<< HEAD
 
 def cnn_predict(code: str) -> dict:
     import torch
 
+=======
+def cnn_predict(code: str) -> dict:
+    import torch
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
     load_cnn()
     inp = _preprocess(code).to(_cnn_model._device)
     with torch.no_grad():
@@ -292,6 +354,7 @@ def cnn_predict(code: str) -> dict:
         "logit":      logit,
     }
 
+<<<<<<< HEAD
 
 # ─────────────────────────────────────────────────────────────────────────────
 # LLM provider helpers  (aligned with phase6_llm_prompting.py)
@@ -576,6 +639,57 @@ def llm_explain(code: str, verdict: str, provider: str = "auto") -> dict:
         "or run 'ollama serve' with a local model."
     )
 
+=======
+# ─────────────────────────────────────────────────────────────────────────────
+# LLM explanation
+# ─────────────────────────────────────────────────────────────────────────────
+def llm_explain(code: str, verdict: str) -> dict:
+    prompt = FEW_SHOT_TEMPLATE.format(code=code, verdict=verdict)
+    groq_key      = os.environ.get("GROQ_API_KEY", "").strip()
+    anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+
+    if groq_key:
+        try:
+            from groq import Groq
+            client = Groq(api_key=groq_key)
+            resp = client.chat.completions.create(
+                model=os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant"),
+                messages=[
+                    {"role": "system", "content": "You are an expert C/C++ security reviewer. Respond ONLY with the JSON object. No markdown, no extra text."},
+                    {"role": "user", "content": prompt},
+                ],
+                max_tokens=500,
+                temperature=0.2,
+            )
+            raw = resp.choices[0].message.content.strip()
+            return json.loads(raw.replace("```json", "").replace("```", "").strip())
+        except Exception as e:
+            console.print(f"[yellow]  Groq failed ({e}), trying Anthropic...[/yellow]")
+
+    if anthropic_key:
+        import urllib.request
+        payload = json.dumps({
+            "model": "claude-haiku-4-5-20251001",
+            "max_tokens": 500,
+            "system": "You are an expert C/C++ security reviewer. Respond ONLY with the JSON object. No markdown, no extra text.",
+            "messages": [{"role": "user", "content": prompt}],
+        }).encode()
+        req = urllib.request.Request(
+            "https://api.anthropic.com/v1/messages",
+            data=payload,
+            headers={
+                "x-api-key": anthropic_key,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+            },
+        )
+        with urllib.request.urlopen(req) as r:
+            data = json.load(r)
+        raw = data["content"][0]["text"].strip()
+        return json.loads(raw.replace("```json", "").replace("```", "").strip())
+
+    raise RuntimeError("No API key found. Set GROQ_API_KEY or ANTHROPIC_API_KEY.")
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Rendering
@@ -583,7 +697,10 @@ def llm_explain(code: str, verdict: str, provider: str = "auto") -> dict:
 SEV_COLOR = {"HIGH": "red", "MEDIUM": "yellow", "LOW": "green"}
 SEV_ICON  = {"HIGH": "●", "MEDIUM": "◆", "LOW": "○"}
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
 def render_header():
     console.print()
     t = Text()
@@ -595,10 +712,15 @@ def render_header():
         "  The LLM (Phase 6 few-shot) then explains why.[/dim]\n"
     )
 
+<<<<<<< HEAD
 
 def render_sample_menu():
     table = Table(box=box.SIMPLE, show_header=True, header_style="bold cyan",
                   border_style="dim", padding=(0, 2))
+=======
+def render_sample_menu():
+    table = Table(box=box.SIMPLE, show_header=True, header_style="bold cyan", border_style="dim", padding=(0, 2))
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
     table.add_column("#",    style="bold white", width=3)
     table.add_column("File", style="green")
     table.add_column("Description", style="dim")
@@ -609,12 +731,18 @@ def render_sample_menu():
     table.add_row("q", "[red]quit[/red]",          "Exit")
     console.print(Panel(table, title="[bold]Select a sample[/bold]", border_style="bright_blue"))
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
 def render_code(code: str, filename: str = "code.c"):
     syntax = Syntax(code, "c", theme="monokai", line_numbers=True, word_wrap=True)
     console.print(Panel(syntax, title=f"[bold cyan]{filename}[/bold cyan]", border_style="dim"))
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
 def render_cnn_result(pred: dict):
     verdict    = pred["verdict"]
     prob_buggy = pred["prob_buggy"]
@@ -622,10 +750,17 @@ def render_cnn_result(pred: dict):
     color = "red" if verdict == "BUGGY" else "green"
     icon  = "✗" if verdict == "BUGGY" else "✓"
 
+<<<<<<< HEAD
     # FIX: clamp marker_pos so it never equals bar_width (IndexError when prob=1.0)
     bar_width  = 30
     marker_pos = min(round(prob_buggy * bar_width), bar_width - 1)
 
+=======
+    # Two-sided bar: red (buggy) on left, green (clean) on right
+    # The | marker shows where the model sits on the 0-1 scale
+    bar_width = 30
+    marker_pos = round(prob_buggy * bar_width)
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
     bar = ""
     for i in range(bar_width):
         if i == marker_pos:
@@ -639,6 +774,7 @@ def render_cnn_result(pred: dict):
     console.print(Rule("[bold]Step 1 — TextCNN Prediction[/bold]", style="dim"))
     console.print()
     t = Text()
+<<<<<<< HEAD
     t.append(f"  {icon}  {verdict}  ",
              style=f"bold {color} on {'#3d0000' if verdict == 'BUGGY' else '#003d00'}")
     console.print(t)
@@ -657,6 +793,13 @@ def render_cnn_result(pred: dict):
         f"{'(negative = leans CLEAN)' if pred['logit'] < 0 else '(positive = leans BUGGY)'}\n"
     )
 
+=======
+    t.append(f"  {icon}  {verdict}  ", style=f"bold {color} on {'#3d0000' if verdict == 'BUGGY' else '#003d00'}")
+    console.print(t)
+    console.print(f"\n  [red]BUGGY[/red] [red]{bar[:marker_pos]}[/red][bold white]{bar[marker_pos]}[/bold white][green]{bar[marker_pos+1:]}[/green] [green]CLEAN[/green]")
+    console.print(f"         [red]P(buggy) = {prob_buggy*100:.1f}%[/red]   [green]P(clean) = {prob_clean*100:.1f}%[/green]")
+    console.print(f"         logit: {pred['logit']:+.3f}   {'(negative = leans CLEAN)' if pred['logit'] < 0 else '(positive = leans BUGGY)'}\n")
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
 
 def render_llm_explanation(expl: dict, elapsed: float):
     issues = expl.get("issues", [])
@@ -668,10 +811,17 @@ def render_llm_explanation(expl: dict, elapsed: float):
     if issues:
         console.print(f"  [bold white]Issues ({len(issues)})[/bold white]")
         for iss in issues:
+<<<<<<< HEAD
             sev  = iss.get("severity", "LOW").upper()
             col  = SEV_COLOR.get(sev, "white")
             icon = SEV_ICON.get(sev, "○")
             console.print(f"  [{col}]{icon} {sev}[/{col}]  [bold]{iss.get('title', '')}[/bold]")
+=======
+            sev  = iss.get("severity", "LOW")
+            col  = SEV_COLOR.get(sev, "white")
+            icon = SEV_ICON.get(sev, "○")
+            console.print(f"  [{col}]{icon} {sev}[/{col}]  [bold]{iss.get('title','')}[/bold]")
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
             for line in textwrap.wrap(iss.get("detail", ""), width=70):
                 console.print(f"       [dim]{line}[/dim]")
             console.print()
@@ -685,21 +835,33 @@ def render_llm_explanation(expl: dict, elapsed: float):
             console.print(f"  {line}")
     console.print()
 
+<<<<<<< HEAD
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Main review flow
 # ─────────────────────────────────────────────────────────────────────────────
 def review_code(code: str, filename: str = "snippet.c", provider: str = "auto"):
+=======
+# ─────────────────────────────────────────────────────────────────────────────
+# Main review flow
+# ─────────────────────────────────────────────────────────────────────────────
+def review_code(code: str, filename: str = "snippet.c"):
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
     render_code(code, filename)
 
     # Step 1: TextCNN
     cnn_error = None
+<<<<<<< HEAD
     with Progress(
         SpinnerColumn(spinner_name="dots", style="cyan"),
         TextColumn("[cyan]Running TextCNN...[/cyan]"),
         transient=True,
     ) as prog:
         prog.add_task("cnn", total=None)
+=======
+    with Progress(SpinnerColumn(spinner_name="dots", style="cyan"), TextColumn("[cyan]Running TextCNN...[/cyan]"), transient=True) as p:
+        p.add_task("cnn", total=None)
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
         try:
             pred = cnn_predict(code)
         except FileNotFoundError as e:
@@ -718,6 +880,7 @@ def review_code(code: str, filename: str = "snippet.c", provider: str = "auto"):
         verdict = pred["verdict"]
 
     # Step 2: LLM explanation
+<<<<<<< HEAD
     with Progress(
         SpinnerColumn(spinner_name="dots2", style="magenta"),
         TextColumn("[magenta]Generating LLM explanation (few-shot)...[/magenta]"),
@@ -729,16 +892,33 @@ def review_code(code: str, filename: str = "snippet.c", provider: str = "auto"):
             expl = llm_explain(code, verdict, provider=provider)
         except RuntimeError as e:
             console.print(f"\n  [red]LLM error:[/red] {e}\n")
+=======
+    with Progress(SpinnerColumn(spinner_name="dots2", style="magenta"), TextColumn("[magenta]Generating LLM explanation (few-shot)...[/magenta]"), transient=True) as p:
+        p.add_task("llm", total=None)
+        t0 = time.time()
+        try:
+            expl = llm_explain(code, verdict)
+        except Exception as e:
+            console.print(f"\n  [red]LLM error:[/red] {e}\n")
+            console.print("  [dim]Set GROQ_API_KEY (free at console.groq.com) or ANTHROPIC_API_KEY.[/dim]\n")
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
             return
         elapsed = time.time() - t0
 
     render_llm_explanation(expl, elapsed)
 
+<<<<<<< HEAD
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Interactive loop
 # ─────────────────────────────────────────────────────────────────────────────
 def interactive(provider: str = "auto"):
+=======
+# ─────────────────────────────────────────────────────────────────────────────
+# Interactive loop
+# ─────────────────────────────────────────────────────────────────────────────
+def interactive():
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
     render_header()
     while True:
         render_sample_menu()
@@ -747,6 +927,7 @@ def interactive(provider: str = "auto"):
         if choice == "q":
             console.print("\n  [dim]Bye![/dim]\n")
             break
+<<<<<<< HEAD
 
         elif choice in SAMPLES:
             s = SAMPLES[choice]
@@ -787,11 +968,46 @@ def interactive(provider: str = "auto"):
             console.print("  [red]Invalid choice.[/red]\n")
 
 
+=======
+        elif choice in SAMPLES:
+            s = SAMPLES[choice]
+            review_code(s["code"], s["name"])
+            if not Confirm.ask("  Review another?", default=True):
+                console.print("\n  [dim]Bye![/dim]\n")
+                break
+        elif choice == "p":
+            console.print("\n  [dim]Paste your C/C++ code. Enter a blank line twice when done.[/dim]\n")
+            lines = []
+            while True:
+                try:
+                    line = input()
+                except EOFError:
+                    break
+                if line == "" and lines and lines[-1] == "":
+                    break
+                lines.append(line)
+            code = "\n".join(lines).strip()
+            if code:
+                review_code(code, "custom.c")
+            else:
+                console.print("  [yellow]No code entered.[/yellow]\n")
+        elif choice == "f":
+            path = Prompt.ask("  File path").strip()
+            p = Path(path)
+            if not p.exists():
+                console.print(f"  [red]File not found:[/red] {path}\n")
+            else:
+                review_code(p.read_text(), p.name)
+        else:
+            console.print("  [red]Invalid choice.[/red]\n")
+
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
 # ─────────────────────────────────────────────────────────────────────────────
 # Entry point
 # ─────────────────────────────────────────────────────────────────────────────
 def main():
     parser = argparse.ArgumentParser(description="Code Review Assistant - TextCNN + LLM demo")
+<<<<<<< HEAD
     parser.add_argument("--file",     "-f", help="Path to a C/C++ file to review")
     parser.add_argument("--sample",   "-s", choices=list(SAMPLES.keys()),
                         help="Run a built-in sample (1-5)")
@@ -799,10 +1015,15 @@ def main():
                         choices=["auto", "groq", "hf", "ollama", "local", "anthropic"],
                         default="auto",
                         help="LLM provider to use (default: auto)")
+=======
+    parser.add_argument("--file",   "-f", help="Path to a C/C++ file to review")
+    parser.add_argument("--sample", "-s", choices=list(SAMPLES.keys()), help="Run a built-in sample (1-5)")
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
     args = parser.parse_args()
 
     if args.file:
         render_header()
+<<<<<<< HEAD
         file_path = Path(args.file)
         if not file_path.exists():
             console.print(f"[red]File not found:[/red] {args.file}")
@@ -815,6 +1036,19 @@ def main():
     else:
         interactive(provider=args.provider)
 
+=======
+        p = Path(args.file)
+        if not p.exists():
+            console.print(f"[red]File not found:[/red] {args.file}")
+            sys.exit(1)
+        review_code(p.read_text(), p.name)
+    elif args.sample:
+        render_header()
+        s = SAMPLES[args.sample]
+        review_code(s["code"], s["name"])
+    else:
+        interactive()
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
 
 if __name__ == "__main__":
     main()

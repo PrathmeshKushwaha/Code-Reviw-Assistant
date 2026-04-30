@@ -1,4 +1,5 @@
 sample_id,true_label,cnn_pred,cnn_confidence,cnn_error_type,manual_avg_zero_shot,manual_avg_one_shot,manual_avg_few_shot,dominant_prompt
+<<<<<<< HEAD
 2189,1,0,0.4786,FN,3.0,4.67,3.67,one_shot
 483,1,0,0.2466,FN,4.67,4.67,4.33,zero_shot
 4253,1,0,0.3332,FN,4.67,4.67,4.33,zero_shot
@@ -20,3 +21,5 @@ sample_id,true_label,cnn_pred,cnn_confidence,cnn_error_type,manual_avg_zero_shot
 2969,0,1,0.6496,FP,3.67,3.67,3.67,zero_shot
 2016,0,1,0.5055,FP,4.67,4.0,4.33,zero_shot
 4513,1,0,0.3348,FN,3.0,3.0,3.0,zero_shot
+=======
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9

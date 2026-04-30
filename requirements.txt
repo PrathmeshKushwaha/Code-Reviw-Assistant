@@ -18,6 +18,10 @@ tqdm>=4.66.0
 matplotlib>=3.7.0
 seaborn>=0.12.0        # For activation heatmaps
 gensim>=4.3.0          # Optional: Word2Vec utils
+<<<<<<< HEAD
 dotenv        # For environment variable management
+=======
+
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
 # Code tokenization
 tokenizers>=0.13.0

@@ -93,8 +93,11 @@ gensim>=4.3.0
 tokenizers>=0.13.0
 ```
 
+<<<<<<< HEAD
 **Installation**: `pip install -r requirements.txt`
 
+=======
+>>>>>>> 786234e1af7e83a1d2dfc59296b5812fe59318d9
 ---
 
 ## 2️⃣ CONFIGS/DEFAULTS.YAML (EXACT CONTENTS)
